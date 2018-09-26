@@ -1,115 +1,103 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import os
+import keyboard
+import mouse
 import cv2 as cv
 import numpy as np
+import winsound
+import ctypes as ct
 from mss import mss
 sct = mss()
+
+EnumWindows = ct.windll.user32.EnumWindows
+EnumWindowsProc = ct.WINFUNCTYPE(ct.c_bool, ct.POINTER(ct.c_int), ct.POINTER(ct.c_int))
+GetWindowText = ct.windll.user32.GetWindowTextW
+GetWindowTextLength = ct.windll.user32.GetWindowTextLengthW
+IsWindowVisible = ct.windll.user32.IsWindowVisible
+
+def sleep(ms):
+    sleep(ms/1000.)
+
+def get_active_window_name():
+    hwnd = ct.windll.user32.GetForegroundWindow()
+    return get_window_title(hwnd)
+
+def get_window_title(hwnd):
+    length = GetWindowTextLength(hwnd)
+    buff = ct.create_unicode_buffer(length + 1)
+    GetWindowText(hwnd, buff, length + 1)
+    return buff.value
+
+def get_matching_windows(title_list):
+    matches = {}
+    def window_enum_callback(hwnd, lParam):
+        if IsWindowVisible(hwnd):
+            window_name = get_window_title(hwnd).lower()
+            for name in title_list:
+                if name not in window_name:
+                    return True
+            matches[window_name] = hwnd
+        return True
+    EnumWindows(EnumWindowsProc(window_enum_callback), 0)
+    return matches
+
+def activate_window(title):
+    matches = get_matching_windows(title)
+    if matches:
+        for key in sorted(matches, key=len):
+            ct.windll.user32.SetForegroundWindow(matches[key])
+            return
+
+def sound_beep(frequency=2000, duration=100):
+    winsound.Beep(frequency, duration)
+
+def send(key, count=1):
+    for _ in range(count):
+        keyboard.send(key)
+
+def click(coords, count=1, button='left'):
+    if count > 0:
+        for _ in range(count):
+            mouse.move(coords[0], coords[1], absolute=True, duration=0)
+            mouse.click(button)
+    else:
+        mouse.move(coords[0], coords[1], absolute=True, duration=0)
 
 def rgb2hex(r,g,b):
     return "#{:02x}{:02x}{:02x}".format(r,g,b)
 
-
 def hex2rgb(hexcode):
-    return tuple(int(hexcode[1:][i:i + 2], 16) for i in (0, 2, 4))
+    return tuple(int(hexcode[2:][i:i + 2], 16) for i in (0, 2, 4))
+
+def hex2brg(hexcode):
+    return [int(hexcode[2:][i:i + 2], 16) for i in (4, 2, 0)]
 
 def _screencap(tl_x, tl_y, br_x, br_y):
-    return cv.cvtColor(np.asarray(sct.grab((tl_x, tl_y, br_x, br_y))), cv.COLOR_BGRA2BGR)
+    return cv.cvtColor(np.asarray(sct.grab((tl_x, tl_y, br_x+1, br_y+1))), cv.COLOR_BGRA2BGR)
 
-
-def loadTemplate(name):
-    template = cv.imread(name, cv.IMREAD_UNCHANGED)
+def load_image(name):
+    template = cv.imread(os.path.normpath(name), cv.IMREAD_UNCHANGED)
     if template.shape[2] > 3:
         channels = cv.split(template)
         mask = np.array(channels[3])
         return {'templ': cv.cvtColor(template, cv.COLOR_BGRA2BGR), 'mask': cv.cvtColor(mask, cv.COLOR_GRAY2BGR), 'method':cv.TM_SQDIFF}
     return {'templ': template, 'method':cv.TM_SQDIFF}
 
+def load_pixel(color):
+    pixel = np.zeros([1, 1, 3], dtype=np.uint8)
+    pixel[0][0] = hex2brg(color)
+    return {'templ': pixel, 'method':cv.TM_SQDIFF}
 
-def pixelSearch(hex_str, x, y, erro = 0):
-    pix = sct.grab((x, y, x + 1, y + 1)).pixel(0,0)
-    c = hex2rgb(hex_str)
-    if erro:
-        top = (pix[0] + erro, pix[1] + erro, pix[2] + erro)
-        bot = (pix[0] - erro, pix[1] - erro, pix[2] - erro)
-        if bot[0] <= c[0] <= top[0] and bot[1] <= c[1] <= top[1] and bot[2] <= c[2] <= top[2]:
-            return True
-        return False
-    else:
-        return pix == c
-
-
-def imageSearch(template, coords, tl_x, tl_y, br_x, br_y, erro = 100):
+def image_search(template, tl_x, tl_y, br_x = None, br_y = None, coords=None, erro = 2):
+    br_x = br_x or tl_x
+    br_y = br_y or tl_y
     source = _screencap(tl_x, tl_y, br_x, br_y)
     res = cv.matchTemplate(source, **template)
     min_erro, max_val, tl, max_loc = cv.minMaxLoc(res)
     if min_erro <= erro:
-        coords[0] = tl[0] + tl_x
-        coords[1] = tl[1] + tl_y
+        if coords:
+            coords[0] = tl[0] + tl_x + int(template['templ'].shape[0]/2)
+            coords[1] = tl[1] + tl_y + int(template['templ'].shape[1]/2)
         return True
     return False
-
-#
-# def GetWindowList():
-#     top_windows = []
-#     win32gui.EnumWindows(windowEnumerationHandler)
-#     return top_windows
-#
-# def windowEnumerationHandler(hwnd, top_windows):
-#     top_windows.append((hwnd, win32gui.GetWindowText(hwnd)))
-#
-#
-# def click(x,y):
-#     win32api.SetCursorPos((x,y))
-#     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y,0,0)
-#     win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP,x,y,0,0)
-#
-# shell = client.Dispatch("WScript.Shell")
-# shell.Run("notepad.exe")
-# win32api.Sleep(200)
-# shell.AppActivate("Sem título - Bloco de notas")
-# win32api.Sleep(200)
-# shell.SendKeys("%")
-# win32api.Sleep(500)
-# shell.SendKeys("t")
-# win32api.Sleep(500)
-# shell.SendKeys("r")
-# win32api.Sleep(500)
-# shell.SendKeys("name")
-# win32api.Sleep(500)
-# shell.SendKeys("{ENTER}")
-#
-# hwin = win32gui.GetDesktopWindow()
-# width = win32api.GetSystemMetrics(win32con.SM_CXVIRTUALSCREEN)
-# height = win32api.GetSystemMetrics(win32con.SM_CYVIRTUALSCREEN)
-# left = win32api.GetSystemMetrics(win32con.SM_XVIRTUALSCREEN)
-# top = win32api.GetSystemMetrics(win32con.SM_YVIRTUALSCREEN)
-# hwindc = win32gui.GetWindowDC(hwin)
-# srcdc = win32ui.CreateDCFromHandle(hwindc)
-# memdc = srcdc.CreateCompatibleDC()
-# bmp = win32ui.CreateBitmap()
-# bmp.CreateCompatibleBitmap(srcdc, width, height)
-# memdc.SelectObject(bmp)
-# memdc.BitBlt((0, 0), (width, height), srcdc, (left, top), win32con.SRCCOPY)
-# bmp.SaveBitmapFile(memdc, 'screenshot.bmp')
-#
-#
-# tmp = win32gui.GetPixel(hwindc, 600, 600)
-# print(tmp)
-#
-#
-# tmp = win32gui.GetCursorPos()
-# print(tmp)
-#
-# click(600, 600)
-#
-#
-# results = []
-# top_windows = []
-# win32gui.EnumWindows(windowEnumerationHandler, top_windows)
-# for i in top_windows:
-#     if "notepad" in i[1].lower():
-#         print(i)
-#         win32gui.ShowWindow(i[0], 5)
-#         win32gui.SetForegroundWindow(i[0])
-#         break
