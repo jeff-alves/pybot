@@ -1,0 +1,5 @@
+keyboard==0.13.2
+mouse==0.7.0
+mss==3.3.1
+numpy==1.15.2
+opencv-python==3.4.3.18

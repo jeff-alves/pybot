@@ -1,79 +1,79 @@
 from lib.pybot.pybot import load_image, image_search, load_pixel
 
 px_skill_1 = {
-    'template':load_pixel('0xFCFCFC'),
+    'template':load_pixel('0xFFFFFF'),
     'tl_x': 728,
-    'tl_y': 1042,
-    'erro':5
+    'tl_y': 1048,
+    'erro': 0
 }
 
 px_skill_2 = {
-    'template':load_pixel('0xFCFCFC'),
+    'template':load_pixel('0xFFFFFF'),
     'tl_x': 787,
-    'tl_y': 1042,
-    'erro':5
+    'tl_y': 1048,
+    'erro': 0
 }
 
 px_skill_3 = {
-    'template':load_pixel('0xFCFCFC'),
-    'tl_x': 845,
-    'tl_y': 1042,
-    'erro':5
+    'template':load_pixel('0xFFFFFF'),
+    'tl_x': 844,
+    'tl_y': 1048,
+    'erro': 0
 }
 
 px_skill_4 = {
-    'template':load_pixel('0xFCFCFC'),
+    'template':load_pixel('0xFFFFFF'),
     'tl_x': 903,
-    'tl_y': 1042,
-    'erro':5
+    'tl_y': 1048,
+    'erro': 0
 }
 
 px_skill_f1 = {
-    'template':load_pixel('0xFCFCFC'),
+    'template':load_pixel('0xFFFFFF'),
     'tl_x': 963,
-    'tl_y': 1042,
-    'erro':5
+    'tl_y': 1048,
+    'erro': 0
 }
 
 px_skill_f2 = {
-    'template':load_pixel('0xFCFCFC'),
+    'template':load_pixel('0xFFFFFF'),
     'tl_x': 1022,
-    'tl_y': 1042,
-    'erro':5
+    'tl_y': 1048,
+    'erro': 0
 }
 
 px_skill_f3 = {
-    'template':load_pixel('0xFDFDFD'),
-    'tl_x': 1080,
-    'tl_y': 1042,
-    'erro':5
+    'template':load_pixel('0xFFFFFF'),
+    'tl_x': 1079,
+    'tl_y': 1048,
+    'erro': 0
 }
 
 px_skill_f4 = {
     'template':load_pixel('0xFFFFFF'),
     'tl_x': 1138,
-    'tl_y': 1042,
-    'erro':5
+    'tl_y': 1048,
+    'erro': 0
 }
 
 px_skill_r = {
-    'template':load_pixel('0xFCFCFC'),
+    'template':load_pixel('0xFFFFFF'),
     'tl_x': 661,
-    'tl_y': 1042,
-    'erro':5
+    'tl_y': 1048,
+    'erro': 0
 }
 
 px_skill_x = {
-    'template':load_pixel('0xFCFCFC'),
-    'tl_x': 1256,
-    'tl_y': 1042,
-    'erro':5
+    'template':load_pixel('0xFDFDFD'),
+    'tl_x': 1255,
+    'tl_y': 1041,
+    'erro': 0
 }
 
 px_em_batalha = {
-    'template':load_pixel('0xFFB6AB'),
-    'tl_x': 914,
-    'tl_y': 1071,
+    'template':load_pixel('0x9CFF9C'),
+    'tl_x': 915,
+    'tl_y': 1070,
     'erro': 1
 }
 
@@ -81,7 +81,7 @@ px_resc_5 = {
     'template':load_pixel('0xFBFFFF'),
     'tl_x': 960,
     'tl_y': 920,
-    'erro': 5
+    'erro': 0
 }
 
 px_resc_2 = {
@@ -176,6 +176,15 @@ im_chat_3 = {
     'erro': 2
 }
 
+im_buff_70_hp = {
+    'template':load_image('C:/Program Files/AutoHotkey/Scripts/wildstar/img/buff_70_hp.png'),
+    'tl_x':498,
+    'tl_y':694,
+    'br_x':764,
+    'br_y':738,
+    'erro': 2
+}
+
 def em_batalha():
     return image_search(**px_em_batalha)
 
@@ -220,6 +229,9 @@ def target_casting():
 
 def hp_100():
     return image_search(**px_hp_100_1) and image_search(**px_hp_100_2)
+
+def hp_70():
+    return image_search(**im_buff_70_hp)
 
 def buff_cura(coords = None):
     return image_search(**im_buff_cura, coords = coords)
