@@ -1,6 +1,6 @@
-from lib.pybot.pybot import activate_window, sleep, send, single_instance, wait, \
-    add_hotkey_double
-from wildstar.util import *
+# -*- coding: UTF-8 -*-
+from lib.pybot.pybot import sleep, activate_window, single_instance, send, add_hotkey_double, wait
+from wildstar.util import skill_f3, skill_f2
 
 coords = [None, None]
 win_name = 'WildStar 16042'

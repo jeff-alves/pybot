@@ -1,5 +1,7 @@
-from lib.pybot.pybot import activate_window, sleep, send, single_instance, wait, \
-    add_hotkey
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
+from lib.pybot.pybot import activate_window, sleep, send, single_instance, wait, add_hotkey
 from wildstar.util import *
 
 coords = [None, None]

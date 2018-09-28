@@ -83,10 +83,7 @@ def click(coords, count=1, button='left'):
         mouse.move(coords[0], coords[1], absolute=True, duration=0)
 
 def rgb2hex(r,g,b):
-    return "#{:02x}{:02x}{:02x}".format(r,g,b)
-
-def hex2rgb(hexcode):
-    return tuple(int(hexcode[2:][i:i + 2], 16) for i in (0, 2, 4))
+    return "0x{:02x}{:02x}{:02x}".format(r,g,b)
 
 def hex2brg(hexcode):
     return [int(hexcode[2:][i:i + 2], 16) for i in (4, 2, 0)]

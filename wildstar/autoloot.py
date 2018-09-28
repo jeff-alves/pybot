@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+
 from lib.pybot.pybot import activate_window, get_active_window_name, sleep, send, click, single_instance, wait, \
     add_hotkey
 from wildstar.util import *
